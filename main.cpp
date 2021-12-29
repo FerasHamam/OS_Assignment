@@ -36,7 +36,7 @@ class Matrix{
     return columns;
   }
   ~Matrix(){
-    delete m;
+    delete []m;
   };
 };
 //
