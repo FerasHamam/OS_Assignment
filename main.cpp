@@ -4,6 +4,7 @@
 #include <cctype>
 #include<fstream>
 #include <cstdlib>
+#include <pthread.h>
 using namespace std;
 //
 //classes
@@ -24,8 +25,7 @@ class Matrix{
     }
   }
   void setValue(int row, int column,int value){
-    m[row][column] = value-48; // to convert ascii to int use => -48
-    // cout<<a[row][column];
+    m[row][column] = value; // to convert ascii to int use => -48
   };
   int** getMatrix(){
     return m;
@@ -41,62 +41,38 @@ class Matrix{
     delete []m;
   };
 };
-//
+//end of classes
 
 //globals
 Matrix x1 =  Matrix();
 Matrix x2 =  Matrix();
-Matrix result=Matrix();
+Matrix result = Matrix();
 int numOfOdd=0;
 int numOfEven=0;
 int totalCells=0;
-//
+int i = -1;
+int j = -1;
+int k = -1;
+//end of globals
 
-//declare functions
-
-//read
-int lineAnalyzing(string, int ,int );
-void readFile();
-
-  //write
-void writeFile();
-//
-
-//cross product 
-void crossProduct(Matrix &m1,Matrix &m2){
-    //Matrix crossProductMatrix=Matrix();
-   int sum;
-   char val;
-   result.setMatrix(m1.getRowsLength(),m1.getColumnsLength());
-   for(int i=0;i<m1.getRowsLength();i++ ){//# of rows for the first matrix
-      
-      for(int j=0;j<m2.getColumnsLength();j++){//# of cols for the second matrix
-         sum=0;
-        for(int k=0;k<m1.getColumnsLength();k++){//# of cols for the first matrix
-        
-        sum=sum+((m1.getMatrix())[i][k])*((m2.getMatrix())[k][j]);
-        //val=sum;
-        
-        
-       
-        
-        
-        }
-        //cout<<sum<<endl;
-        result.setValue(i,j,sum+48);
-        
-     
-     
-     cout << (result.getMatrix()[i][j]) << endl;
-      
-      }
-      
-cout<<endl;
-
-   }
-  
-  }
 //Read functions
+int lineAnalyzing(string line, int lineCounter, int matrixSize){
+  int counter=0;
+  for(int i = 0 ; i < line.length(); i++){//i = characters index of a line
+    if(isspace(line[i])){
+      continue;
+    }
+    else if(lineCounter < matrixSize){
+      x1.setValue(lineCounter%matrixSize,counter,line[i] - 48);
+      counter++;
+    }
+    else{
+      x2.setValue(lineCounter%matrixSize,counter,line[i] - 48);
+      counter++;
+    }
+  }
+  return counter;
+}
 
 void readFile(){
     int matrixSize = 0;//columns and rows of the matrix
@@ -121,40 +97,53 @@ void readFile(){
   file.close();
 }
 
-int lineAnalyzing(string line, int lineCounter, int matrixSize){
-  int counter=0;
-  for(int i = 0 ; i < line.length(); i++){//i = characters index of a line
-    if(isspace(line[i])){
-      continue;
-    }
-    else if(lineCounter < matrixSize){
-      x1.setValue(lineCounter%matrixSize,counter,line[i]);
-      counter++;
-    }
-    else{
-      x2.setValue(lineCounter%matrixSize,counter,line[i]);
-      counter++;
+//end of read functions
+
+//cross product 
+void* crossProduct(void *id){
+  printf("oui");
+  int sum;
+  char val;
+  result.setMatrix(x1.getRowsLength(),x1.getColumnsLength());
+  while(i<x1.getRowsLength()-1){//# of rows for the first matrix
+    i++;
+    while(j<x2.getColumnsLength()){//# of cols for the second matrix
+      j++;
+      sum=0;
+      while(k<x1.getColumnsLength()){//# of cols for the first matrix
+      k++;
+      sum=sum+((x1.getMatrix())[i][k])*((x2.getMatrix())[k][j]);
+      //val=sum;
+      }
+      //cout<<sum<<endl;
+      if(sum%2 == 0)//is sum Even??
+        numOfEven++;
+      else
+        numOfOdd++;
+      result.setValue(i,j,sum);
+      totalCells++;
     }
   }
-  return counter;
 }
+//end of crossproduct
+
 int main(){
-readFile();//do not change order of readfile => always the first line of main
-  for (int i = 0; i < x1.getRowsLength(); i++){
-    for(int j = 0 ; j < x1.getColumnsLength(); j++)
-    {
-      cout<<x1.getMatrix()[i][j];
-    }
-    cout<<endl;
+  readFile();//do not change order of readfile => always the first line of main
+  //thread Number
+  int NumOfThreads;
+  printf("Enter number of threads : ");
+  scanf("%d" , &NumOfThreads);
+  printf("\n");
+  //end of thread Number
+  //declaring threads
+  pthread_t threads[NumOfThreads];
+  //end of declaring threads
+  for(int i = 0 ; i< NumOfThreads ; i++){
+    pthread_create(&threads[i],NULL,crossProduct,&NumOfThreads);
   }
-  for (int i = 0; i < x1.getRowsLength(); i++){
-    for(int j = 0 ; j < x1.getColumnsLength(); j++)
-    {
-      cout<<x2.getMatrix()[i][j];
-    }
-    cout<<endl;
+  for(int i = 0 ; i< NumOfThreads ; i++){
+    pthread_exit(NULL);
   }
- 
-  
-  crossProduct(x1,x2);
+  // crossProduct();
+  printf("numOfEven=%d numOfOdd=%d totalCells=%d\n",numOfEven,numOfOdd,totalCells);
 }
