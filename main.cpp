@@ -3,6 +3,7 @@
 #include<string>
 #include <cctype>
 #include<fstream>
+#include <cstdlib>
 using namespace std;
 //
 //classes
@@ -22,8 +23,8 @@ class Matrix{
       m[i] = new int[columns];
     }
   }
-  void setValue(int row, int column,char value){
-    m[row][column] = value - 48; // to convert ascii to int use => -48
+  void setValue(int row, int column,int value){
+    m[row][column] = value-48; // to convert ascii to int use => -48
     // cout<<a[row][column];
   };
   int** getMatrix(){
@@ -35,6 +36,7 @@ class Matrix{
   int getColumnsLength(){
     return columns;
   }
+  
   ~Matrix(){
     delete []m;
   };
@@ -44,6 +46,10 @@ class Matrix{
 //globals
 Matrix x1 =  Matrix();
 Matrix x2 =  Matrix();
+Matrix result=Matrix();
+int numOfOdd=0;
+int numOfEven=0;
+int totalCells=0;
 //
 
 //declare functions
@@ -56,6 +62,40 @@ void readFile();
 void writeFile();
 //
 
+//cross product 
+void crossProduct(Matrix &m1,Matrix &m2){
+    //Matrix crossProductMatrix=Matrix();
+   int sum;
+   char val;
+   result.setMatrix(m1.getRowsLength(),m1.getColumnsLength());
+   for(int i=0;i<m1.getRowsLength();i++ ){//# of rows for the first matrix
+      
+      for(int j=0;j<m2.getColumnsLength();j++){//# of cols for the second matrix
+         sum=0;
+        for(int k=0;k<m1.getColumnsLength();k++){//# of cols for the first matrix
+        
+        sum=sum+((m1.getMatrix())[i][k])*((m2.getMatrix())[k][j]);
+        //val=sum;
+        
+        
+       
+        
+        
+        }
+        //cout<<sum<<endl;
+        result.setValue(i,j,sum+48);
+        
+     
+     
+     cout << (result.getMatrix()[i][j]) << endl;
+      
+      }
+      
+cout<<endl;
+
+   }
+  
+  }
 //Read functions
 
 void readFile(){
@@ -114,4 +154,7 @@ readFile();//do not change order of readfile => always the first line of main
     }
     cout<<endl;
   }
+ 
+  
+  crossProduct(x1,x2);
 }
