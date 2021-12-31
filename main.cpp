@@ -1,10 +1,10 @@
 //Name : Feras Hamam   ID : 134806  
 #include<iostream>
 #include<string>
-#include <cctype>
+#include<cctype>
 #include<fstream>
-#include <cstdlib>
-#include <pthread.h>
+#include<cstdlib>
+// #include<pthread.h>
 using namespace std;
 //
 //classes
@@ -50,13 +50,14 @@ Matrix result = Matrix();
 int numOfOdd=0;
 int numOfEven=0;
 int totalCells=0;
-int i = -1;
-int j = -1;
-int k = -1;
+int ii = -1;
+int jj = -1;
+int kk = -1;
 //end of globals
 
 //Read functions
 int lineAnalyzing(string line, int lineCounter, int matrixSize){
+  cout<<line<<endl;
   int counter=0;
   for(int i = 0 ; i < line.length(); i++){//i = characters index of a line
     if(isspace(line[i])){
@@ -99,51 +100,58 @@ void readFile(){
 
 //end of read functions
 
-//cross product 
-void* crossProduct(void *id){
-  printf("oui");
-  int sum;
-  char val;
-  result.setMatrix(x1.getRowsLength(),x1.getColumnsLength());
-  while(i<x1.getRowsLength()-1){//# of rows for the first matrix
-    i++;
-    while(j<x2.getColumnsLength()){//# of cols for the second matrix
-      j++;
-      sum=0;
-      while(k<x1.getColumnsLength()){//# of cols for the first matrix
-      k++;
-      sum=sum+((x1.getMatrix())[i][k])*((x2.getMatrix())[k][j]);
-      //val=sum;
-      }
-      //cout<<sum<<endl;
-      if(sum%2 == 0)//is sum Even??
-        numOfEven++;
-      else
-        numOfOdd++;
-      result.setValue(i,j,sum);
-      totalCells++;
-    }
-  }
-}
+// //cross product 
+// void* crossProduct(void *id){
+//   int* no = (int *)id;
+//   printf("ThreadID=%d", *no);
+//   int sum;
+//   char val;
+//   result.setMatrix(x1.getRowsLength(),x1.getColumnsLength());
+//   while(ii<x1.getRowsLength()-1){//# of rows for the first matrix
+//     ii++;
+//     while(jj<x2.getColumnsLength()-1){//# of cols for the second matrix
+//       jj++;
+//       sum=0;
+//       while(kk<x1.getColumnsLength()-1){//# of cols for the first matrix
+//       kk++;
+//       sum=sum+((x1.getMatrix())[ii][kk])*((x2.getMatrix())[kk][jj]);
+//       //val=sum;
+//       }
+//       cout<<sum<<endl;
+//       if(sum%2 == 0)//is sum Even??
+//         numOfEven++;
+//       else
+//         numOfOdd++;
+//       result.setValue(ii,jj,sum);
+//       totalCells++;
+//     }
+//   }
+//   // printf("numOfEven=%d numOfOdd=%d totalCells=%d\n",numOfEven,numOfOdd,totalCells);
+//   return NULL;
+// }
 //end of crossproduct
 
 int main(){
   readFile();//do not change order of readfile => always the first line of main
-  //thread Number
-  int NumOfThreads;
-  printf("Enter number of threads : ");
-  scanf("%d" , &NumOfThreads);
-  printf("\n");
-  //end of thread Number
-  //declaring threads
-  pthread_t threads[NumOfThreads];
-  //end of declaring threads
-  for(int i = 0 ; i< NumOfThreads ; i++){
-    pthread_create(&threads[i],NULL,crossProduct,&NumOfThreads);
+  for (int i = 0; i < x1.getColumnsLength(); i++)
+  {
+    for (int j = 0 ; x1.getColumnsLength(); j++)
+    {
+      cout<<x1.getMatrix()[i][j];
+    }
+    cout<<endl;
   }
-  for(int i = 0 ; i< NumOfThreads ; i++){
-    pthread_exit(NULL);
-  }
-  // crossProduct();
-  printf("numOfEven=%d numOfOdd=%d totalCells=%d\n",numOfEven,numOfOdd,totalCells);
+  // //thread Number
+  // int NumOfThreads;
+  // printf("Enter number of threads : ");
+  // scanf("%d" , &NumOfThreads);
+  // printf("\n");
+  // //end of thread Number
+  // //declaring threads
+  // pthread_t threads[NumOfThreads];
+  // //end of declaring threads
+  // int x = pthread_create(&threads[0],NULL,*crossProduct,&threads[0]);
+  // pthread_join(threads[0],NULL);
+  // // crossProduct();
+  return 0;
 }
