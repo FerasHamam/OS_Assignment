@@ -5,6 +5,7 @@
 #include<fstream>
 #include<cstdlib>
 #include<pthread.h>
+#include <functional>
 using namespace std;
 //
 //classes
@@ -141,12 +142,13 @@ void *crossProduct(void *id){
 }
 //end of crossproduct
 
-int main(){
+int main(int argc , char* argv[]){
   readFile();//do not change order of readfile => always the first line of main
   //thread Number
   int NumOfThreads;
-  printf("Enter number of threads : ");
-  scanf("%d" , &NumOfThreads);
+  //printf("Enter number of threads : ");
+  //scanf("%d" , &NumOfThreads);
+  NumOfThreads = atoi(argv[1]);
   printf("\n");
   //end of thread Number
   //declaring threads
