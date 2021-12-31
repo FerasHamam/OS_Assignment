@@ -11,7 +11,7 @@
       "stopAtEntry": false,
       "cwd": "/home/ferashamam/Desktop/OS_Assignment",
       "environment": [],
-      "program": "/home/ferashamam/Desktop/OS_Assignment/build/Debug/outDebug",
+      "program": "/home/ferashamam/Desktop/OS_Assignment/main.out",
       "internalConsoleOptions": "openOnSessionStart",
       "MIMode": "gdb",
       "miDebuggerPath": "/usr/bin/gdb",
