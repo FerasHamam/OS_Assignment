@@ -1,11 +1,12 @@
-//Name : Feras Hamam   ID : 134806  
-#include<iostream>
-#include<string>
-#include<cctype>
-#include<fstream>
-#include<cstdlib>
-#include<pthread.h>
-#include <functional>
+//Name : Feras Hamam    ID : 134806  
+//Name : Tala AbuQdais  ID : 132333 
+//Name : Amal Rasas     ID : ?  
+#include <iostream>
+#include <string>
+#include <cctype>
+#include <fstream>
+#include <cstdlib>
+#include <pthread.h>
 using namespace std;
 //
 //classes
@@ -27,6 +28,7 @@ class Matrix{
     }
   }
   void setValue(int row, int column,int value){
+    cout<<value<<endl;
     m[row][column] = value; // to convert ascii to int use => -48
     length++;
   };
@@ -45,7 +47,6 @@ class Matrix{
   };
 };
 //end of classes
-
 //globals
 Matrix x1 =  Matrix();
 Matrix x2 =  Matrix();
@@ -60,13 +61,22 @@ bool finished = false;
 //Read functions
 int lineAnalyzing(string line, int lineCounter, int matrixSize){
   int counter=0;
+  string value="";
   for(int i = 0 ; i < line.length(); i++){//i = characters index of a line
     if(isspace(line[i])){
       continue;
     }
     else if(lineCounter < matrixSize){
-      x1.setValue(lineCounter%matrixSize,counter,line[i] - 48);
-      counter++;
+      value += line[i];
+      if(isspace(line[i+1]) && value.length() > 0)
+      {
+        x1.setValue(lineCounter%matrixSize,counter,stoi(value));
+        counter++;
+        value="";
+      }
+      else{
+        continue;
+      }
     }
     else{
       x2.setValue(lineCounter%matrixSize,counter,line[i] - 48);
@@ -100,6 +110,22 @@ void readFile(){
 }
 
 //end of read functions
+
+//write functions
+void writeResult(){
+  ofstream file;
+  string s = "";
+  file.open("out.txt");
+    for(int i =0 ; i < result.getRowsLength() ; i++){
+      for(int j = 0 ; j < result.getColumnsLength();j++){
+        s += " " + to_string(result.getMatrix()[i][j]);
+      }
+      file<<s<<endl;
+      s="";
+  }
+  file.close();
+}
+//end of write functions
 
 //cross product 
 void *crossProduct(void *id){
@@ -146,8 +172,6 @@ int main(int argc , char* argv[]){
   readFile();//do not change order of readfile => always the first line of main
   //thread Number
   int NumOfThreads;
-  //printf("Enter number of threads : ");
-  //scanf("%d" , &NumOfThreads);
   NumOfThreads = atoi(argv[1]);
   printf("\n");
   //end of thread Number
@@ -171,11 +195,6 @@ int main(int argc , char* argv[]){
       }
   }
   printf("numOfEven=%d numOfOdd=%d totalCells=%d\n",numOfEven,numOfOdd,totalCells);
-  for(int i =0 ; i < result.getRowsLength() ; i++){
-    for(int j = 0 ; j < result.getColumnsLength();j++){
-      printf("%d",result.getMatrix()[i][j]);
-    }
-    printf("\n");
-  }
+  writeResult();
   //end of starting threads
 }
