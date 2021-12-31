@@ -28,7 +28,6 @@ class Matrix{
     }
   }
   void setValue(int row, int column,int value){
-    cout<<value<<endl;
     m[row][column] = value; // to convert ascii to int use => -48
     length++;
   };
@@ -62,13 +61,15 @@ bool finished = false;
 int lineAnalyzing(string line, int lineCounter, int matrixSize){
   int counter=0;
   string value="";
+  line+=" ";
   for(int i = 0 ; i < line.length(); i++){//i = characters index of a line
     if(isspace(line[i])){
+      value="";
       continue;
     }
     else if(lineCounter < matrixSize){
       value += line[i];
-      if(isspace(line[i+1]) && value.length() > 0)
+      if((isspace(line[i+1]) && value.length() > 0 ))
       {
         x1.setValue(lineCounter%matrixSize,counter,stoi(value));
         counter++;
@@ -79,8 +80,16 @@ int lineAnalyzing(string line, int lineCounter, int matrixSize){
       }
     }
     else{
-      x2.setValue(lineCounter%matrixSize,counter,line[i] - 48);
-      counter++;
+      value += line[i];
+      if(isspace(line[i+1]) && value.length() > 0)
+      {
+        x2.setValue(lineCounter%matrixSize,counter,stoi(value));
+        counter++;
+        value="";
+      }
+      else{
+        continue;
+      }
     }
   }
   return counter;
