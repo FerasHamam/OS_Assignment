@@ -7,6 +7,7 @@
 #include <fstream>
 #include <cstdlib>
 #include <pthread.h>
+#include <math.h>
 using namespace std;
 //
 //classes
@@ -50,11 +51,11 @@ class Matrix{
 Matrix x1 =  Matrix();
 Matrix x2 =  Matrix();
 Matrix result = Matrix();
-int numOfOdd=0;
-int numOfEven=0;
-int totalCells=0;
-int firstMRow = -1;
-bool finished = false;
+int numOfOdd=0;//Number of odd cells
+int numOfEven=0;//Number of even cells
+int totalCells=0;//Number of overall cells
+int firstMRow = 0;//first Matrix Row Counter to use it in threads
+int threadWork  = 0;//how much each thread should work determined in main
 //end of globals
 
 //Read functions
@@ -141,18 +142,24 @@ void *crossProduct(void *id){
   int threadID = (intptr_t)id;
   int startLoop = -1;
   int endLoop = -1;
-  int sum;
+  int i = 0;//rows of first matrix
+  int sum=0;
+  int counter = 0;//counter to determine when a thread should stop
   while(true){//# of rows for the first matrix
-    if(firstMRow >= x1.getRowsLength() -1){
-      break;
+    if(threadWork < 1)
+    {
+      threadWork = 1;
     }
+    if(firstMRow >= x1.getRowsLength() || counter >= threadWork){
+      break;//end thread if all rows have been calculated before or if the thread has finished his work(threadWork)
+    }
+    i = firstMRow;
     firstMRow++;
-    int i = firstMRow;
-    if(startLoop ==-1)//if it is not running yet!
+    if(startLoop == -1)//if it is not running yet!
     {
       startLoop = i;
+      endLoop = i;
     }
-    endLoop = i;//always update
     for(int j = 0;j<x2.getColumnsLength();j++){//# of cols for the second matrix
       sum=0;
       for(int k = 0; k<x1.getColumnsLength();k++){//# of cols for the first matrix 
@@ -165,12 +172,14 @@ void *crossProduct(void *id){
       result.setValue(i,j,sum);
       totalCells++;
     }
+    endLoop++;
+    counter++;
   }
   if(startLoop == -1 && endLoop ==-1){
-    printf("ThreadID=%d\n", threadID+1);
+    printf("ThreadID=%d\n", threadID);
   }
   else{
-    printf("ThreadID=%d, startLoop=%d, endLoop=%d\n",threadID+1, startLoop,endLoop);
+    printf("ThreadID=%d, startLoop=%d, endLoop=%d\n",threadID, startLoop,endLoop);
   }
   
   return NULL;
@@ -180,12 +189,13 @@ void *crossProduct(void *id){
 int main(int argc , char* argv[]){
   readFile();//do not change order of readfile => always the first line of main
   //thread Number
-  int NumOfThreads;
+  int NumOfThreads = 0;//number of threads
   NumOfThreads = atoi(argv[1]);
   printf("\n");
   //end of thread Number
   //declaring threads
   pthread_t threads[NumOfThreads];
+  threadWork = ceil(x1.getRowsLength()/NumOfThreads);//how much each thread should work
   //end of declaring threads
   //starting threads
   result.setMatrix(x1.getRowsLength(),x1.getColumnsLength());
@@ -205,5 +215,12 @@ int main(int argc , char* argv[]){
   }
   printf("numOfEven=%d numOfOdd=%d totalCells=%d\n",numOfEven,numOfOdd,totalCells);
   writeResult();
+  printf("\n");
+  for(int i =0 ; i < result.getRowsLength() ; i++){
+      for(int j = 0 ; j < result.getColumnsLength();j++){
+        printf("%d ",result.getMatrix()[i][j]);
+  }
+  printf("\n");
+  }
   //end of starting threads
 }
