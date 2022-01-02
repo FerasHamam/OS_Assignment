@@ -1,6 +1,4 @@
-//Name : Feras Hamam    ID : 134806  
-//Name : Tala AbuQdais  ID : 132333 
-//Name : Amal Rasas     ID : ?  
+//Authors: Feras Iyad Awad Hamam,134806+TALA HANI AHMAD ABU QIDDEES,132333+AMAL ISHAQ AHMED RASSAS,132835
 #include <iostream>
 #include <string>
 #include <cctype>
