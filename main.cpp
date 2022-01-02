@@ -17,11 +17,13 @@ class Matrix{
   int columns;
   int rows;
   int** m;//nd array => matrix
-  int length = 0;
+  int numOfOdd=0;//Number of odd cells
+  int numOfEven=0;//Number of even cells
+  int totalCells=0;//Number of overall cells
   public:
   Matrix(){}
-  //creates nd array
-  void setMatrix(int rows, int columns){
+  //setters
+  void setMatrix(int rows, int columns){ //creates nd array
     this->rows = rows;
     this->columns = columns;
     m = new int*[rows];
@@ -31,8 +33,13 @@ class Matrix{
   }
   void setValue(int row, int column,int value){
     m[row][column] = value; // to convert ascii to int use => -48
-    length++;
+    totalCells++;
+    if(value%2==0)
+      numOfEven++;
+    else
+      numOfOdd++;
   };
+  //getters
   int** getMatrix(){
     return m;
   };
@@ -42,7 +49,15 @@ class Matrix{
   int getColumnsLength(){
     return columns;
   }
-  
+  int getTotalCells(){
+    return totalCells;
+  }
+  int getNoEven(){
+    return numOfEven;
+  }
+  int getNoOdd(){
+    return numOfOdd;
+  }
   ~Matrix(){
     delete []m;
   };
@@ -52,9 +67,6 @@ class Matrix{
 Matrix x1 =  Matrix();
 Matrix x2 =  Matrix();
 Matrix result = Matrix();
-int numOfOdd=0;//Number of odd cells
-int numOfEven=0;//Number of even cells
-int totalCells=0;//Number of overall cells
 int firstMRow = 0;//first Matrix Row Counter to use it in threads
 int threadWork  = 0;//how much each thread should work determined in main
 sem_t semaphore;
@@ -145,28 +157,22 @@ void *crossProduct(void *id){
   int startLoop = -1;
   int endLoop = -1;
   int i = 0;//rows of first matrix
-  int sum=0;
+  int sum = 0;
   int counter = 0;//counter to determine when a thread should stop
   while(true){//# of rows for the first matrix
     if(threadWork < 1)
     {
       threadWork = 1;
     }
-    
-    
-    
+    sem_wait(&semaphore);
     if(firstMRow >= x1.getRowsLength() || counter >= threadWork){
-    
       endLoop = i+1;
-      
+      sem_post(&semaphore);
       break;//end thread if all rows have been calculated before or if the thread has finished his work(threadWork)
     }
-    sem_wait(&semaphore);
     i = firstMRow;
     firstMRow++;
-    
     sem_post(&semaphore);
-    
     if(startLoop == -1)//if it is not running yet!
     {
       startLoop = i;
@@ -179,13 +185,7 @@ void *crossProduct(void *id){
       sum=sum+((x1.getMatrix())[i][k])*((x2.getMatrix())[k][j]);
       }
       sem_wait(&semaphore);
-      if(sum%2 == 0)//is sum Even??
-        numOfEven++;
-      else
-        numOfOdd++;
-        
       result.setValue(i,j,sum);
-      totalCells++;
       sem_post(&semaphore);
     }
     counter++;
@@ -212,7 +212,6 @@ int main(int argc , char* argv[]){
   
   threadWork = ceil(x1.getRowsLength()/NumOfThreads);//how much each thread should work
   //end of declaring threads
- 
   //starting threads
   result.setMatrix(x1.getRowsLength(),x1.getColumnsLength());
   sem_init(&semaphore,0,1);
@@ -230,10 +229,8 @@ int main(int argc , char* argv[]){
          exit(-1);
       }
   }
-  
-  printf("numOfEven=%d numOfOdd=%d totalCells=%d\n",numOfEven,numOfOdd,totalCells);
   sem_destroy(&semaphore);
+  printf("numOfEven=%d numOfOdd=%d totalCells=%d\n",result.getNoEven(),result.getNoOdd(),result.getTotalCells());
   writeResult();
-  
   //end of starting threads
 }
