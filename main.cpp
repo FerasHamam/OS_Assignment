@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <pthread.h>
 #include <math.h>
+#include<semaphore.h>
 using namespace std;
 //
 //classes
@@ -56,6 +57,7 @@ int numOfEven=0;//Number of even cells
 int totalCells=0;//Number of overall cells
 int firstMRow = 0;//first Matrix Row Counter to use it in threads
 int threadWork  = 0;//how much each thread should work determined in main
+sem_t semaphore;
 //end of globals
 
 //Read functions
@@ -150,12 +152,21 @@ void *crossProduct(void *id){
     {
       threadWork = 1;
     }
+    
+    
+    
     if(firstMRow >= x1.getRowsLength() || counter >= threadWork){
+    
       endLoop = i+1;
+      
       break;//end thread if all rows have been calculated before or if the thread has finished his work(threadWork)
     }
+    sem_wait(&semaphore);
     i = firstMRow;
     firstMRow++;
+    
+    sem_post(&semaphore);
+    
     if(startLoop == -1)//if it is not running yet!
     {
       startLoop = i;
@@ -167,12 +178,15 @@ void *crossProduct(void *id){
       for(int k = 0; k<x1.getColumnsLength();k++){//# of cols for the first matrix 
       sum=sum+((x1.getMatrix())[i][k])*((x2.getMatrix())[k][j]);
       }
+      sem_wait(&semaphore);
       if(sum%2 == 0)//is sum Even??
         numOfEven++;
       else
         numOfOdd++;
+        
       result.setValue(i,j,sum);
       totalCells++;
+      sem_post(&semaphore);
     }
     counter++;
   }
@@ -195,10 +209,13 @@ int main(int argc , char* argv[]){
   //end of thread Number
   //declaring threads
   pthread_t threads[NumOfThreads];
+  
   threadWork = ceil(x1.getRowsLength()/NumOfThreads);//how much each thread should work
   //end of declaring threads
+ 
   //starting threads
   result.setMatrix(x1.getRowsLength(),x1.getColumnsLength());
+  sem_init(&semaphore,0,1);
   for(int i = 0 ; i < NumOfThreads; i++){
       int rc = pthread_create(threads+i,NULL,*crossProduct,(void *) (intptr_t) i);
       if (rc) {
@@ -213,7 +230,10 @@ int main(int argc , char* argv[]){
          exit(-1);
       }
   }
+  
   printf("numOfEven=%d numOfOdd=%d totalCells=%d\n",numOfEven,numOfOdd,totalCells);
+  sem_destroy(&semaphore);
   writeResult();
+  
   //end of starting threads
 }
